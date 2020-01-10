@@ -6,7 +6,9 @@ import glob
 import serial
 
 fileList = []
-start = "Start"
+start = "S"
+end = "End"
+last = False
 path = '/home/pi/SanDraw/PatternSender/patternDir'
 for r, d, f in os.walk(path):
     for file in f:
@@ -19,30 +21,30 @@ def checkResponse():
     wait = True
     while wait:
         resp = ser.readline()
+        print(resp.decode('utf-8'))
         if "Done" in resp.decode('utf-8'):
             wait = False
         
 
 def sendCoords():
-    print("function called")
     for file in fileList:
         with open(path + "/" + file) as f:
-            while True: 
-                line = f.readline()
-                if not line:
-                    break
-                if not '#' in line:
-                    print("coord sent")
-                    ser.write(line.encode('utf-8'))
-                    checkResponse()
+                lines = f.readlines()
+                last = lines[-1]
+                for line in lines:
+                    if not line:
+                        break
+                    if not '#' in line:
+                        ser.write(line.encode('utf-8'))
+                        checkResponse()
+                    if line is last:
+                        last = True
+                        break
                 
 
-while True:
+while not last:
     ser.write(start.encode('utf-8'))
     resp = ser.readline()
-    print(resp.decode('utf-8'))
     if "Waiting" in resp.decode('utf-8'):
-        print("Waiting came")
         sendCoords()
-        break
 
