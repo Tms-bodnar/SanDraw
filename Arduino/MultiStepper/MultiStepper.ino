@@ -29,12 +29,13 @@ void initPosArray() {
   positions[1] = 0;
 }
 
-void readIncoming() {
+bool readIncoming() {
   static boolean recvInProgress = false;
   static byte ndx = 0;
   char startMarker = '<';
   char endMarker = '>';
   char startOperation = 'S';
+  char endOperation = 'E';
   char rc;
 
   while (Serial.available() > 0 && newData == false) {
@@ -53,12 +54,18 @@ void readIncoming() {
         ndx = 0;
         newData = true;
       }
+      return true;
     }
     else if (rc == startMarker) {
       recvInProgress = true;
+      return true;
     }
     else if (rc == startOperation) {
-      Serial.println(WAITING); 
+      Serial.println(WAITING);
+      return true;
+    }
+    else if ( rc == endOperation ) {
+      return false;
     }
   }
 }
@@ -73,24 +80,41 @@ void moveSteppers() {
     stepper2.setMaxSpeed(35);
     int i = 0;
     long positions[MOTORS];
-    char temp[4];
+    char temp[5];
     temp[0] = incoming[0];
     temp[1] = incoming[1];
-    i = atoi(temp);
+    temp[2] = incoming[2];
+    temp[3] = incoming[3];
+  temp[4] = incoming[4];
+    i = atol(temp);
     positions[0] = i;
-    temp[0] = incoming[3];
-    temp[1] = incoming[4];
-    i = atoi(temp);
+    temp[0] = incoming[6];
+    temp[1] = incoming[7];
+    temp[2] = incoming[8];
+    temp[3] = incoming[9];
+    temp[4] = incoming[10];
+    i = atol(temp);
     positions[1] = i;
     Serial.print(positions[0]);
     Serial.print(" ");
     Serial.print(positions[1]);
     Serial.print(" Step ");
+//    if ( positions[0] == 0 ) {
+//      stepper1.disableOutputs();
+//    }
+//    if ( positions[1] == 0 ) {
+//      stepper2.disableOutputs();
+//    }
     steppers.moveTo(positions);
     steppers.runSpeedToPosition();
     Serial.println(DONE);
     newData = false;
   }
+}
+
+void disableSteppers(){
+  stepper1.disableOutputs();
+  stepper2.disableOutputs();
 }
 
 void setup() {
@@ -109,6 +133,10 @@ void setup() {
 }
 
 void loop() {
-  readIncoming();
+  if ( readIncoming() ){
   moveSteppers();
+  }
+  else {
+    disableSteppers();
+  }
 }
