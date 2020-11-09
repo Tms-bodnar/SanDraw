@@ -1,4 +1,3 @@
-
 import math
 import os
 import serial
@@ -7,103 +6,111 @@ fileList = []
 start = "S"
 end = "E"
 last = False
-MICROSTEP_CORR = 0.1125
-maxRadius = 0
-stepDivRemainderArm2 = 0
-stepDivRemainderArm1 = 0
-prevArm2Deg = 0
-prevArm1Deg = 0
-firstLine = False
-path = '/home/pi/SanDraw/PatternSender/patternDir'
-resfile = open(path + '/res.txt','a') 
+MICRO_STEP_CORR = 0.1125
+max_radius = 0
+step_div_remainder_arm2 = 0
+step_div_remainder_arm1 = 0
+prev_arm2_deg = 0
+prev_arm1_deg = 0
+deg2_modifier = 0
+deg1_modifier = 0
+first_line = False
+# path = '/home/pi/SanDraw/PatternSender/patternDir'
+path = './PatternDir'
+# res_file = open(path + '/res.txt', 'a')
+res_file = open(path + '/res.txt', 'a')
 for r, d, f in os.walk(path):
     for file in f:
         if '.thr' in file:
             fileList.append(file)
-ser = serial.Serial('/dev/ttyACM0', '9600')
+# ser = serial.Serial('/dev/ttyACM0', '9600')
+ser = serial.Serial('COM8')
 ser.flushInput()
 
-def parseDegrees(line):
-    global firstLine
-    global prevArm1Deg
-    global prevArm2Deg
-    global stepDivRemainderArm2
-    global stepDivRemainderArm1
-    global maxRadius
-    global deg2Modifier
-    global deg1Modifier
+
+def parse_degrees(line):
+    global first_line
+    global prev_arm1_deg
+    global prev_arm2_deg
+    global step_div_remainder_arm2
+    global step_div_remainder_arm1
+    global max_radius
+    global deg2_modifier
+    global deg1_modifier
     raws = line.split(" ")
-    Z = 0
-    tht = 0
-    armLength = 0.5
-    
+    z: float
+    tht: float
+    # arm_length = 0.5
     tht = float(raws[0])
-    Z = float(raws[1])
+    z = float(raws[1])
     
-    arm1Step = 0
-    arm1Deg = 0
-    thtdeg = round(math.degrees(tht), 6)
-    if tht < 0:
-        thtdeg = round(thtdeg + (360 * round(abs(thtdeg) // 360, 0)+1)  + 180, 6)
-    arm1Deg = round(math.degrees(math.acos(Z)), 6)
-    arm1Step = (( prevArm1Deg - arm1Deg ) / MICROSTEP_CORR)  * 1.333333
-    stepDivRemainderArm1 = arm1Step % 1 + stepDivRemainderArm1
-    if stepDivRemainderArm1 > 1:
-        arm1Step = arm1Step + stepDivRemainderArm1 // 1 if arm1Step > 0 else arm1Step - stepDivRemainderArm1 // 1
-        stepDivRemainderArm1 = stepDivRemainderArm1 % 1    
+    arm1_step: float
+    arm1_deg: float
+    # tht_deg = round(math.degrees(tht), 6)
+    # if tht < 0:
+    # tht_deg = round(tht_deg + (360 * round(abs(tht_deg) // 360, 0)+1) + 180, 6)
+    arm1_deg = round(math.degrees(math.acos(z)), 6)
+    arm1_step = ((prev_arm1_deg - arm1_deg) / MICRO_STEP_CORR) * 1.333333
+    step_div_remainder_arm1 = arm1_step % 1 + step_div_remainder_arm1
+    if step_div_remainder_arm1 > 1:
+        arm1_step = arm1_step + step_div_remainder_arm1 // 1 if arm1_step > 0 \
+            else arm1_step - step_div_remainder_arm1 // 1
+        step_div_remainder_arm1 = step_div_remainder_arm1 % 1
     
-    arm2Deg = round(math.degrees(math.asin(Z)), 6) * 2
-    arm2Step = abs(( prevArm2Deg - arm2Deg ) / MICROSTEP_CORR)
-    stepDivRemainderArm2 = arm2Step % 1 + stepDivRemainderArm2
-    if stepDivRemainderArm2 > 1:
-        arm2Step = arm2Step + stepDivRemainderArm2 // 1 if arm2Step > 0 else arm2Step - stepDivRemainderArm2 // 1
-        stepDivRemainderArm2 = stepDivRemainderArm2 % 1
+    arm2_deg = round(math.degrees(math.asin(z)), 6) * 2
+    arm2_step = abs((prev_arm2_deg - arm2_deg) / MICRO_STEP_CORR)
+    step_div_remainder_arm2 = arm2_step % 1 + step_div_remainder_arm2
+    if step_div_remainder_arm2 > 1:
+        arm2_step = arm2_step + step_div_remainder_arm2 // 1 if arm2_step > 0 \
+            else arm2_step - step_div_remainder_arm2 // 1
+        step_div_remainder_arm2 = step_div_remainder_arm2 % 1
             
-    coordinates = "<" + str(arm1Step).split(".")[0].zfill(5) + "T" + str(0).split(".")[0].zfill(5) + "R>";
-    if not firstLine:
-        resfile.write(str(tht) + ' ' +  str(Z) + ' ' + str(int(arm1Step)) + ' ' + str(int(arm2Step)) + '\n')
+    coordinates = "<" + str(arm1_step).split(".")[0].zfill(5) + "T" + str(0).split(".")[0].zfill(5) + "R>"
+    if not first_line:
+        res_file.write(str(tht) + ' ' + str(z) + ' ' + str(arm1_step) + ' ' + str(arm2_step) + '\n')
         ser.write(coordinates.encode('utf-8'))
         print(coordinates)
-        checkResponse()
+        check_response()
     
-    if not firstLine:
-        temp1 = arm1Deg
-        arm1Deg =  arm1Deg - prevArm1Deg 
-        prevArm1Deg = temp1
+    if not first_line:
+        temp1 = arm1_deg
+        arm1_deg = arm1_deg - prev_arm1_deg
+        prev_arm1_deg = temp1
         
-        temp2 = arm2Deg
-        arm2Deg = arm2Deg - prevArm2Deg
-        prevArm2Deg = temp2
+        temp2 = arm2_deg
+        arm2_deg = arm2_deg - prev_arm2_deg
+        prev_arm2_deg = temp2
       
-        if prevArm2Deg == 0:
-            deg2Modifier = deg2Modifier * -1
-            deg1Modifier = deg1Modifier * -1
+        if prev_arm2_deg == 0:
+            deg2_modifier = deg2_modifier * -1
+            deg1_modifier = deg1_modifier * -1
        
-    if firstLine:
-        prevArm1Deg = arm1Deg     
-        prevArm2Deg = arm2Deg
-    firstLine = False
+    if first_line:
+        prev_arm1_deg = arm1_deg
+        prev_arm2_deg = arm2_deg
+    first_line = False
 
-def checkResponse():
+
+def check_response():
     wait = True
     while wait:
-        checkedResp = ser.readline()
-    #    print(checkedResp.decode('utf-8'))
-        if "Done" in checkedResp.decode('utf-8'):
+        check_resp = ser.readline()
+    #    print(check_resp.decode('utf-8'))
+        if "Done" in check_resp.decode('utf-8'):
             wait = False
         
 
-def sendCoords():
-    global maxRadius
-    global deg2Modifier
-    global deg1Modifier
+def send_coordinates():
+    global max_radius
+    global deg2_modifier
+    global deg1_modifier
     for oneFile in fileList:
-        deg2Modifier = 1
-        deg1Modifier = 1
+        deg2_modifier = 1
+        deg1_modifier = 1
         with open(path + "/" + oneFile) as openedFile:
-            global firstLine
+            global first_line
             global last
-            firstLine = True
+            first_line = True
             lines = openedFile.readlines()
             last = lines[-1]
             for line in lines:
@@ -112,20 +119,20 @@ def sendCoords():
                     last = True
                     break
                 if line.find('Max Radius: ') > 0:
-                    maxRadius = float(line[18:])
+                    max_radius = float(line[18:])
                 if not line.startswith('#') and not line.startswith('\n'):
-                    parseDegrees(line)
+                    parse_degrees(line)
                     
                 if line is last:
-                    resfile.close()
+                    res_file.close()
                     ser.write(end.encode('utf-8'))
                     break
-            
+
+
 x = 0
 while x < 1:
     ser.write(start.encode('utf-8'))
     resp = ser.readline()
     if "Waiting" in resp.decode('utf-8'):
-        sendCoords()
+        send_coordinates()
         x += 1
-
