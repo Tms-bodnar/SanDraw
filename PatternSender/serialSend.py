@@ -57,8 +57,8 @@ def parse_degrees(line):
 
     rho_for_arm1_calc = rho
     if theta < 0:
-        theta += math.pi
-        rho_for_arm1_calc *= -1
+        theta += (theta % math.pi) * math.pi
+        rho_for_arm1_calc *= NEGATIVE
         arm2_direction_modifier = NEGATIVE
 
     theta_degrees = round(math.degrees(theta), 6)
@@ -108,14 +108,12 @@ def check_response():
 
 def send_coordinates():
     for oneFile in fileList:
-        with open(path + "/" + oneFile) as openedFile:
+        with open(path + "/" + oneFile) as opened_file:
             global line_is_first
             line_is_first = True
-            lines = openedFile.readlines()
+            lines = opened_file.readlines()
             last_line = lines[-1]
             for line in lines:
-                if not line:
-                    break
                 if not line.startswith('#') and not line.startswith('\n'):
                     parse_degrees(line)
                 if line is last_line:
