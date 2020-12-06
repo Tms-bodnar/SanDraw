@@ -35,8 +35,7 @@ ser = serial.Serial('/dev/ttyACM0', '9600')
 ser.flushInput()
 
 
-# calculate steps from theta-rho pairs
-def parse_degrees(line):
+def calculate_steps_from_theta_rho_pairs(line):
     global ARM_LENGTH
     global line_is_first
     global theta_previous
@@ -115,7 +114,7 @@ def send_coordinates():
             last_line = lines[-1]
             for line in lines:
                 if not line.startswith('#') and not line.startswith('\n'):
-                    parse_degrees(line)
+                    calculate_steps_from_theta_rho_pairs(line)
                 if line is last_line:
                     steps_result_file.close()
                     ser.write(end_code.encode('utf-8'))
