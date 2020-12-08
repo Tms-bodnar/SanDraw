@@ -1,8 +1,9 @@
-## Welcome to GitHub Pages
 
-You can use the [editor on GitHub](https://github.com/tmsBodnar/SanDraw/edit/master/README.md) to maintain and preview the content for your website in Markdown files.
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
+## Welcome to the home of sand drawing machine
+
+The idea came from the awesome sisyphus table, https://sisyphus-industries.com/ 
+I'm a DIY guy, and i thought, i can make it.
 
 ### Markdown
 
