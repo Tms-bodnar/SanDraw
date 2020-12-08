@@ -4,7 +4,7 @@
 <p align="center">
 <h2>Welcome to the home of sand drawing machine</h2>
 </p>
-The idea came from the awesome [sisyphus table] (https://sisyphus-industries.com/). 
+The idea came from the awesome [sisyphus table](https://sisyphus-industries.com/). 
 I'm a DIY guy, and i thought, i can make it.
 
 ### Type
@@ -31,5 +31,5 @@ My solution for the problem is a polar system, with two arms.
 
 ### Thanks
 
-[Jeff Eberl] (https://github.com/jeffeb3/sandify)
+[Jeff Eberl](https://github.com/jeffeb3/sandify)
 
