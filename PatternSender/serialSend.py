@@ -1,6 +1,7 @@
 import math
 import os
 import serial
+from decimal import Decimal
 
 waiting_for_arduino = True
 
@@ -43,6 +44,7 @@ def calculate_steps_from_theta_rho_pairs(line):
     global rho_previous_for_arm1
     global arm1_step_remainder
     global arm2_step_remainder
+    global steps_result_file
 
     arm2_direction_modifier = POSITIVE  # variable for arm2 direction
     raws = line.split(" ")
@@ -55,8 +57,8 @@ def calculate_steps_from_theta_rho_pairs(line):
         rho_previous_for_arm1 = rho
 
     rho_for_arm1_calc = rho
-    if theta < 0:
-        theta += (theta % math.pi) * math.pi
+    if theta < 0 and (theta_previous - theta) > math.pi - 0.1:
+        theta += math.pi
         rho_for_arm1_calc *= NEGATIVE
         arm2_direction_modifier = NEGATIVE
 
@@ -66,28 +68,32 @@ def calculate_steps_from_theta_rho_pairs(line):
     arm1_degrees = round(theta_degrees + math.degrees(math.acos(rho_for_arm1_calc)), 6)
     arm1_degrees_previous = round(theta_degrees_previous + math.degrees(math.acos(rho_previous_for_arm1)), 6)
     arm1_step = ((arm1_degrees_previous - arm1_degrees) / MICRO_STEP_CORR) * GEAR_RATIO
+    arm1_step = round(arm1_step)
 
-    arm1_step_remainder += arm1_step % 1
-    if abs(arm1_step_remainder) > 1:
-        arm1_step += arm1_step_remainder
-        arm1_step_remainder = arm1_step % 1
+# needs improvement, now better without remainder calculation
+#    arm1_step_remainder += arm1_step % 1
+#    if abs(arm1_step_remainder) > 1:
+#        arm1_step += arm1_step_remainder
+#        arm1_step_remainder = arm1_step % 1
 
     arm2_degrees = round(math.degrees(math.acos((ARM_LENGTH - rho * rho) / ARM_LENGTH)), 6)
     arm2_degrees_previous = round(math.degrees(math.acos((ARM_LENGTH - rho_previous * rho_previous) / ARM_LENGTH)), 6)
     arm2_step = (arm2_degrees_previous - arm2_degrees) / MICRO_STEP_CORR * arm2_direction_modifier
+    arm2_step = round(arm2_step)
 
-    arm2_step_remainder += arm2_step % 1
-    if abs(arm2_step_remainder) > 1:
-        arm2_step += arm2_step_remainder
-        arm2_step_remainder = arm2_step % 1
+# needs improvement, now better without remainder calculation
+#    arm2_step_remainder += arm2_step % 1
+#    if abs(arm2_step_remainder) > 1:
+#        arm2_step += arm2_step_remainder
+#        arm2_step_remainder = arm2_step % 1
      
-    coordinates = "<" + str(arm1_step).split(".")[0].zfill(5) + "T" + str(arm2_step).split(".")[0].zfill(5) + "R>"
+    coordinates = "<" + str(arm1_step).zfill(5) + "T" + str(arm2_step).zfill(5) + "R>"
 
     if line_is_first:
         steps_result_file.write('x,y' + '\n')
         line_is_first = False
     else:
-        steps_result_file.write(str(arm1_step).split(".")[0] + ',' + str(arm2_step).split(".")[0] + '\n')
+        steps_result_file.write(str(arm1_step) + ',' + str(arm2_step) + '\n')
         ser.write(coordinates.encode('utf-8'))
         print(coordinates)
         check_response()
@@ -106,19 +112,19 @@ def check_response():
         
 
 def send_coordinates():
+    global steps_result_file
     for oneFile in fileList:
         with open(path + "/" + oneFile) as opened_file:
             global line_is_first
             line_is_first = True
             lines = opened_file.readlines()
             last_line = lines[-1]
-            for line in lines:
-                if not line.startswith('#') and not line.startswith('\n'):
-                    calculate_steps_from_theta_rho_pairs(line)
-                if line is last_line:
-                    steps_result_file.close()
-                    ser.write(end_code.encode('utf-8'))
+            for x in range(len(lines)):
+                if not lines[x].startswith('#') and not lines[x].startswith('\n'):
+                    calculate_steps_from_theta_rho_pairs(lines[x])
+                if lines[x] is len(lines)-1:
                     break
+    ser.write(end_code.encode('utf-8'))        
 
 
 while waiting_for_arduino:
@@ -127,3 +133,5 @@ while waiting_for_arduino:
     if "Waiting" in resp.decode('utf-8'):
         send_coordinates()
         waiting_for_arduino = False
+
+steps_result_file.close()
