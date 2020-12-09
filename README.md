@@ -4,12 +4,14 @@
 <p align="center">
 <h2>Welcome to the home of sand drawing machine</h2>
 </p>
-The idea came from the awesome [sisyphus](https://sisyphus-industries.com). 
+
+### Idea
+The idea came from the awesome  [Sisyphus table](https://sisyphus-industries.com)  <br>
 I'm a DIY guy, and i thought, i can make it.
 
 ### Type
 
-My solution for the problem is a polar system, with two arms.
+My solution for the problem is a [SCARA robot](https://en.wikipedia.org/wiki/SCARA), with two arms.
 
 ### Hardware
 
@@ -18,6 +20,7 @@ My solution for the problem is a polar system, with two arms.
 * Protoneer CNC shield for Arduino Uno
 * Stepper Motors
 * Custom bearing base
+* slipring
 * OpenBuilds v-slot profiles
 * OpenBUilds gears and timing belt
 * screws and parts from local DIY store
