@@ -4,7 +4,7 @@
 <p align="center">
 <h2>Welcome to the home of sand drawing machine</h2>
 </p>
-The idea came from the awesome [sisyphus table](https://sisyphus-industries.com). 
+The idea came from the awesome [sisyphus](https://sisyphus-industries.com). 
 I'm a DIY guy, and i thought, i can make it.
 
 ### Type
@@ -27,7 +27,7 @@ My solution for the problem is a polar system, with two arms.
 * Python 3.7
 * Arduino IDE
 * Accelstepper library
-* [Sandify] (https.sandify.org)
+* [Sandify](https://sandify.org)
 
 ### Thanks
 
