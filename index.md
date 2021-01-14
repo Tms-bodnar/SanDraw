@@ -20,9 +20,9 @@ My solution for the problem is a [SCARA robot](https://en.wikipedia.org/wiki/SCA
 * Protoneer CNC shield for Arduino Uno
 * Stepper Motors
 * Custom bearing base
-* slipring
+* Slipring
 * OpenBuilds v-slot profiles
-* OpenBUilds gears and timing belt
+* OpenBuilds gears and timing belt
 * screws and parts from local DIY store
 
 ### Software
@@ -31,6 +31,9 @@ My solution for the problem is a [SCARA robot](https://en.wikipedia.org/wiki/SCA
 * Arduino IDE
 * Accelstepper library
 * [Sandify](https://sandify.org)
+
+### First version, the whole system where in rolling part, not worked as excepted
+
 
 ### Thanks
 
