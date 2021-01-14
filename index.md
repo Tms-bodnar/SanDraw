@@ -32,7 +32,7 @@ My solution for the problem is a [SCARA robot](https://en.wikipedia.org/wiki/SCA
 * Accelstepper library
 * [Sandify](https://sandify.org)
 
-### First version, the whole system where in rolling part, not worked as excepted
+### First version, the whole system was on the rotor, didn' work as expected
 
 
 ### Thanks
